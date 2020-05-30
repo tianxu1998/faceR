@@ -359,15 +359,16 @@ def compare_faces(known_face_encodings, face_encoding_to_check, tolerance=0.6):
     dis = face_distance(known_face_encodings, face_encoding_to_check)
     return list(dis <= tolerance)
 
-
 # ---------------------------------#
 #   把图像数据转成ndarray
 #   参数img_path: 图片路径
 #   返回值：ndarray
 # ---------------------------------#
 def convert_img(img_path):
-    img = Image.open(img_path)
-    return np.array(img)
+    # img = Image.open(img_path)
+    # img.show()
+    # return np.array(img)
+    return cv2.imread(img_path)
 
 
 # ---------------------------------#
@@ -377,6 +378,8 @@ def convert_img(img_path):
 #   返回值：无
 # ---------------------------------#
 def save_image(to_path, data):
-    data = data[:, :, 0]
-    img = Image.fromarray(data)
-    img.save(to_path)
+    # data = data[:, :, 2]
+    # img = Image.fromarray(data)
+    # img.save(to_path)
+    cv2.imwrite(to_path, data)
+
