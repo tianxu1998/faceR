@@ -15,6 +15,8 @@
 # def runoob(request):
 #     views_str = "<a href='https://www.baidu.com/'>点击跳转</a>"
 #     return render(request, "runoob.html", {"views_str": views_str})
+import json
+
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -63,6 +65,7 @@ def upload(request):
     res = 0
     try:
         res = face.clac_vec(path)
+        res = json.dumps({"vec": res})
     except Exception as e:
         res = "calc vec error"
         print(e)
@@ -83,6 +86,7 @@ def uploadwithparam(request):
     res = 0
     try:
         res = face.clac_distance(param, path)
+        res = json.dumps({"distance" : res})
     except Exception as e:
         print(e)
         res = "计算相似度错误"
