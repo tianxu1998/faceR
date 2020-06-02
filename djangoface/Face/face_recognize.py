@@ -1,3 +1,5 @@
+import json
+
 import cv2
 import os
 import numpy as np
@@ -105,40 +107,53 @@ class face_rec():
             face_encoding = utils.calc_128_vec(self.facenet_model, new_img)
 
             face_encodings.append(face_encoding)
+        if len(face_encodings) > 1:
+            res = "-1"
+        else:
+            res = face_encodings[0]
+        # for face_encoding in face_encodings:
+        #     # 取出一张脸并与数据库中所有的人脸进行对比，计算得分
+        #     matches = utils.compare_faces(self.known_face_encodings, face_encoding, tolerance=0.9)
+        #     name = "Unknown"
+        #     # 找出距离最近的人脸
+        #     face_distances = utils.face_distance(self.known_face_encodings, face_encoding)
+        #     print("输出对应数据库所有图片的距离得分（最小值为最接近）：", face_distances)
+        #     # 取出这个最近人脸的评分
+        #     best_match_index = np.argmin(face_distances)
+        #     arr = []
+        #     arr.append(self.known_face_encodings[best_match_index])
+        #     tmp = utils.face_distance(arr, face_encoding)
+        #     if tmp < min:
+        #         min = tmp
+        #         res = face_encoding
+        return res
 
-        for face_encoding in face_encodings:
-            # 取出一张脸并与数据库中所有的人脸进行对比，计算得分
-            matches = utils.compare_faces(self.known_face_encodings, face_encoding, tolerance=0.9)
-            name = "Unknown"
+    def calc_vec(self, img_path):
+        code = 1
+        res = None
+        try:
+            draw = utils.convert_img(img_path)
+            res = self.calc_128_vec(draw)
+            if res == "-1":
+                code = 0
+        except Exception:
+            code = 0
+        return json.dumps({"code": code, "vec": ",".join(str(it) for it in res.tolist())})
+
+    def calc_distance(self, vec, img_path):
+        code = 1
+        res = None
+        try:
+            vec = vec.split(",")
+            vec = list(map(map_to_float, vec))
+            vec = np.array(vec)
             # 找出距离最近的人脸
-            face_distances = utils.face_distance(self.known_face_encodings, face_encoding)
-            print("输出对应数据库所有图片的距离得分（最小值为最接近）：", face_distances)
+            face_distances = utils.face_distance(self.known_face_encodings, vec)
             # 取出这个最近人脸的评分
             best_match_index = np.argmin(face_distances)
             arr = []
             arr.append(self.known_face_encodings[best_match_index])
-            tmp = utils.face_distance(arr, face_encoding)
-            if tmp < min:
-                min = tmp
-                res = face_encoding
-        return res
-
-    def calc_vec(self, img_path):
-        draw = utils.convert_img(img_path)
-        res = self.calc_128_vec(draw)
-        return ",".join(str(it) for it in res.tolist())
-
-    def calc_distance(self, vec, img_path):
-        vec = vec.split(",")
-        vec = list(map(map_to_float, vec))
-        vec = np.array(vec)
-        print(vec)
-        print(self.known_face_encodings[0])
-        # 找出距离最近的人脸
-        face_distances = utils.face_distance(self.known_face_encodings, vec)
-        # 取出这个最近人脸的评分
-        best_match_index = np.argmin(face_distances)
-        arr = []
-        arr.append(self.known_face_encodings[best_match_index])
-        res = utils.face_distance(arr, vec)
-        return res[0]
+            res = utils.face_distance(arr, vec)
+        except Exception:
+            code = 0
+        return json.dumps({"code": code, "distance": res[0]})

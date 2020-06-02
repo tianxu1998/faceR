@@ -64,11 +64,10 @@ def upload(request):
         return HttpResponse("no files for upload!")
     res = 0
     try:
-        res = face.clac_vec(path)
-        res = json.dumps({"vec": res})
+        res = face.calc_vec(path)
     except Exception as e:
-        res = "calc vec error"
         print(e)
+        res = "calc vec error(Cause by: Unknown)"
     return HttpResponse(res)
 
 def uploadwithparam(request):
@@ -79,15 +78,12 @@ def uploadwithparam(request):
         save = open(os.path.join(settings.MEDIA_ROOT, pic.name), 'wb+')  # 打开特定的文件进行二进制的写操作
         for chunk in pic.chunks():  # 分块写入文件
             save.write(chunk)
-        # print(type(pic))z
         save.close()
     except:
         return HttpResponse("no files for upload!")
     res = 0
     try:
-        res = face.clac_distance(param, path)
-        res = json.dumps({"distance" : res})
-    except Exception as e:
-        print(e)
-        res = "计算相似度错误"
+        res = face.calc_distance(param, path)
+    except Exception:
+        res = "calc distance error(Cause by: Unknown)"
     return HttpResponse(res)
