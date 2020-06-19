@@ -109,22 +109,34 @@ class face_rec():
             code = 0
         return json.dumps({"code": code, "vec": res})
 
-    def calc_distance(self, vec, img_path):
+    def calc_distance(self, vecs, img_path):
         code = 1
         res = None
+        vecs = vecs.split("~")
         try:
             draw = utils.convert_img(img_path)
             other_vec = self.calc_128_vec(draw)
-            vec = vec.split(",")
-            vec = list(map(map_to_float, vec))
-            vec = np.array(vec)
             arr = []
-            arr.append(other_vec)
-            print((type(other_vec)))
-            print(other_vec)
-            res = utils.face_distance(arr, vec)
-
+            for vec in vecs:
+                vec = vec.split(",")
+                vec = list(map(map_to_float, vec))
+                vec = np.array(vec)
+                arr.append(vec)
+            res = utils.face_distance(other_vec, arr)
+            num = 0
+            min = res[0]
+            for t in res:
+                if (t <= 0.8):
+                    num += 1
+                min = t if t < min else min
+            # if min >= 0.6:
+            #     code = 0
+            if num < 3:
+                code = 0
+            print(res)
         except Exception as e:
             logging.exception(e)
             code = 0
-        return json.dumps({"code": code, "distance": res[0]})
+        return json.dumps({"code": code, "distance": min})
+
+
